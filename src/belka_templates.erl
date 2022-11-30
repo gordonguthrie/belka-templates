@@ -5,6 +5,9 @@
 % http://erlang.org/doc/design_principles/gen_server_concepts.html
 -behaviour(gen_server).
 
+-define(NEWLINE, [10]).
+-define(CRLF,    [13, 10]).
+
 % API
 -export([start_link/0, start_link/1, start_link/2]).
 -export([start_link_local/0, start_link_local/1, start_link_local/2]).
@@ -74,7 +77,8 @@ init(_Args) ->
 
 handle_call({render, {Template, Vals}}, _From, #state{templates = Templates} = State) ->
     T = maps:get(Template, Templates),
-    Reply = io_lib:format("~ts", [dactyl:render(T, Vals)]),
+    Binary = list_to_binary(dactyl:render(T, Vals)),
+    Reply = re:replace(Binary, ?NEWLINE, ?CRLF, [global]),
     {reply, Reply, State};
 
 handle_call(reload_templates, _From, State) ->
