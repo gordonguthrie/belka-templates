@@ -23,7 +23,8 @@
 
 % function API
 -export([
-            render/2
+            render/2,
+            render/3
         ]).
 
 % admin/debug API
@@ -60,6 +61,9 @@ start_link(Args, Opts) ->
 render(Template, Vals) ->
     gen_server:call(?MODULE, {render, {Template, Vals}}).
 
+render(CallBackMod, Template, Vals) ->
+    gen_server:call(?MODULE, {render, {CallBackMod, Template, Vals}}).
+
 % Admin/debugging fns
 
 reload_templates() ->
@@ -78,6 +82,12 @@ init(_Args) ->
 handle_call({render, {Template, Vals}}, _From, #state{templates = Templates} = State) ->
     T = maps:get(Template, Templates),
     Binary = list_to_binary(dactyl:render(T, Vals)),
+    Reply = re:replace(Binary, ?NEWLINE, ?CRLF, [global]),
+    {reply, Reply, State};
+
+handle_call({render, {CallBackMod, Template, Vals}}, _From, #state{templates = Templates} = State) ->
+    T = maps:get(Template, Templates),
+    Binary = list_to_binary(dactyl:render(CallBackMod, T, Vals)),
     Reply = re:replace(Binary, ?NEWLINE, ?CRLF, [global]),
     {reply, Reply, State};
 
