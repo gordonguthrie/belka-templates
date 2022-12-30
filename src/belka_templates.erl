@@ -141,6 +141,7 @@ print_templates(Templates) ->
     [io:format("* ~s~n", [X]) || {X, _} <- maps:to_list(Templates)].
 
 % Templates are expected to be in ./priv/templates
+%
 % ***TODO***: this won't work in production babes need to specify a location
 
 load_templates() ->

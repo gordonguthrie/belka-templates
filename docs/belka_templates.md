@@ -205,6 +205,7 @@ print_templates(Templates) ->
 ```
 
 Templates are expected to be in ./priv/templates
+
 ***TODO***: this won't work in production babes need to specify a location
 
 ```erlang
