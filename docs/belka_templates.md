@@ -3,7 +3,7 @@ ex: ts=4 sw=4 et
 
 # Overview
 
-A simpble gen server to load and serve templates
+A simple gen server to load and serve templates.
 
 ```erlang
 
@@ -114,7 +114,7 @@ list_templates() ->
 
 ## Normal Gen Server Callbacks
 
-On starting the server `init` loads the templates
+On starting the server `init` loads the templates.
 
 ```erlang
 
@@ -125,7 +125,7 @@ init(_Args) ->
 
 ```
 
-The server handles two types of template calls that map to `dactyl:render/2` and `dactyl:render/3`
+The server handles two types of template calls that map to `dactyl:render/2` and `dactyl:render/3`.
 
 ```erlang
 

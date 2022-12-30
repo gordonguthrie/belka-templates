@@ -3,7 +3,7 @@
 
 % # Overview
 
-% A simpble gen server to load and serve templates
+% A simple gen server to load and serve templates.
 
 -module(belka_templates).
 
@@ -78,14 +78,14 @@ list_templates() ->
 
 % ## Normal Gen Server Callbacks
 
-% On starting the server `init` loads the templates
+% On starting the server `init` loads the templates.
 
 init(_Args) ->
     true = register(?MODULE, self()),
     Templates = load_templates(),
     {ok, #state{templates = Templates}}.
 
-% The server handles two types of template calls that map to `dactyl:render/2` and `dactyl:render/3`
+% The server handles two types of template calls that map to `dactyl:render/2` and `dactyl:render/3`.
 
 handle_call({render, {Template, Vals}}, _From, #state{templates = Templates} = State) ->
     T = maps:get(Template, Templates),
