@@ -1,0 +1,7 @@
+toc:
+  - title: Contents
+    subfolderitems:
+      - page: belka_templates.erl
+        url:  ./belka_templates.html
+      - page: index.erlang_architecture
+        url:  ./index.html
