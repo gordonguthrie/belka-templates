@@ -8,6 +8,8 @@
 %
 % Belka Templates use [Dactyl](https://github.com/basho/dactyl) as the smallest template engine.
 
+% Belka Templates will support multiple web sites. The server picks up a root directory from the system config (see the example file). In that directory there should be a directory for each website that is being served on the Belka server and each application should put its own templates in there.
+
 %jekyll <div>
 %jekyll {% for item in site.data.contents.toc %}
 %jekyll     <h3>{{ item.title }}</h3>

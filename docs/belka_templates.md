@@ -46,8 +46,8 @@ A simple gen server to load and serve templates.
 
 ```erlang
 -export([
-            render/2,
-            render/3
+            render/3,
+            render/4
         ]).
 
 ```
@@ -92,11 +92,11 @@ start_link(Args, Opts) ->
 
 ```erlang
 
-render(Template, Vals) ->
-    gen_server:call(?MODULE, {render, {Template, Vals}}).
+render(Site, Template, Vals) ->
+    gen_server:call(?MODULE, {render, {Site, Template, Vals}}).
 
-render(CallBackMod, Template, Vals) ->
-    gen_server:call(?MODULE, {render, {CallBackMod, Template, Vals}}).
+render(CallBackMod, Site, Template, Vals) ->
+    gen_server:call(?MODULE, {render, {CallBackMod, Site, Template, Vals}}).
 
 ```
 
@@ -129,16 +129,18 @@ The server handles two types of template calls that map to `dactyl:render/2` and
 
 ```erlang
 
-handle_call({render, {Template, Vals}}, _From, #state{templates = Templates} = State) ->
-    T = maps:get(Template, Templates),
-    Binary = list_to_binary(dactyl:render(T, Vals)),
-    Reply = re:replace(Binary, ?NEWLINE, ?CRLF, [global]),
+handle_call({render, {Site, Template, Vals}}, _From, #state{templates = Templates} = State) ->
+    {Site, S} = lists:keyfind(Site, 1, Templates),
+    T         = maps:get(Template, S),
+    Binary    = list_to_binary(dactyl:render(T, Vals)),
+    Reply     = re:replace(Binary, ?NEWLINE, ?CRLF, [global]),
     {reply, Reply, State};
 
-handle_call({render, {CallBackMod, Template, Vals}}, _From, #state{templates = Templates} = State) ->
-    T = maps:get(Template, Templates),
-    Binary = list_to_binary(dactyl:render(CallBackMod, T, Vals)),
-    Reply = re:replace(Binary, ?NEWLINE, ?CRLF, [global]),
+handle_call({render, {CallBackMod, Site, Template, Vals}}, _From, #state{templates = Templates} = State) ->
+    {Site, S} = lists:keyfind(Site, 1, Templates),
+    T         = maps:get(Template, S),
+    Binary    = list_to_binary(dactyl:render(CallBackMod, T, Vals)),
+    Reply     = re:replace(Binary, ?NEWLINE, ?CRLF, [global]),
     {reply, Reply, State};
 
 ```
@@ -198,25 +200,27 @@ code_change(_OldVsn, State, _Extra) ->
 
 ```erlang
 
-print_templates(Templates) ->
-    io:format("The loaded templates are:~n"),
-    [io:format("* ~s~n", [X]) || {X, _} <- maps:to_list(Templates)].
-
-```
-
-Templates are expected to be in ./priv/templates
-
-***TODO***: this won't work in production babes need to specify a location
-
-```erlang
+print_templates([]) -> ok;
+print_templates([{Site, Templates} | T]) when map_size(Templates) == 0->
+    io:format("There are no templates for ~p~n", [Site]),
+    print_templates(T);
+print_templates([{Site, Templates} | T]) ->
+    io:format("The loaded templates for ~p are:~n", [Site]),
+    [io:format("* ~s~n", [X]) || {X, _} <- maps:to_list(Templates)],
+    print_templates(T).
 
 load_templates() ->
-    {ok, Templates} = file:list_dir("./priv/templates"),
-    Compiled = [{filename:basename(X, ".txt"), compile(X)} || X <- Templates],
+    {ok, TemplatesDir} = application:get_env(belka_templates, templates_dir),
+    {ok, Sites} = file:list_dir(TemplatesDir),
+    [{X, load_templates(filename:join([TemplatesDir, X]))} || X <- Sites].
+
+load_templates(Dir) ->
+    {ok, Templates} = file:list_dir(Dir),
+    Compiled = [{filename:basename(X, ".txt"), compile(Dir, X)} || X <- Templates],
     maps:from_list(Compiled).
 
-compile(File) ->
-    {ok, Binary} = file:read_file(filename:join("./priv/templates", File)),
+compile(Dir, File) ->
+    {ok, Binary} = file:read_file(filename:join(Dir, File)),
     CharList = binary_to_list(Binary),
     {ok, Compiled} = dactyl:compile(unicode:characters_to_list(CharList, utf8)),
     Compiled.
