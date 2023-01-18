@@ -18,12 +18,14 @@
 -export([start_link_local/0, start_link_local/1, start_link_local/2]).
 
 % ## Callback API Export Definition
--export([init/1,
-         handle_call/3,
-         handle_cast/2,
-         handle_info/2,
-         terminate/2,
-         code_change/3]).
+-export([
+            init/1,
+            handle_call/3,
+            handle_cast/2,
+            handle_info/2,
+            terminate/2,
+            code_change/3
+         ]).
 
 
 % ## Function API Export Definition
